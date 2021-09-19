@@ -69,18 +69,6 @@ final class BIP39Tests: XCTestCase {
         XCTAssertEqual(checksumCS, 0b1111)
     }
 
-    func testEntropyPlusChecksumGrouped() {
-        // given
-        let sut = makeSUT()
-
-        // when
-        let input = Array<UInt8>(repeating: 1, count: 16)
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups.first, 0b0000000000001000)
-    }
-
     func testEntropy129PlusChecksumGrouped() {
         // given
         let sut = makeSUT()
@@ -91,30 +79,6 @@ final class BIP39Tests: XCTestCase {
 
         // then
         XCTAssertEqual(groups.first, 0b0000010000001100)
-    }
-
-    func testEntropyPlusChecksumGroupedWithArguments() {
-        // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 0, count: 16)
-
-        // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups.first, 0b0000000000000000)
-    }
-
-    func testVerifySecondElementForEntropyPlusChecksumGrouped() {
-        // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 1, count: 16)
-
-        // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups[1], 0b0000000001000000)
     }
 
     func testVerifySecondElementForEntropyPlusChecksumGroupedWithElement129() {
@@ -128,53 +92,43 @@ final class BIP39Tests: XCTestCase {
         // then
         XCTAssertEqual(groups[1], 0b0000000001100000)
     }
-
-    func testVerifyThirdElementForEntropyPlusChecksumGrouped() {
+    
+    //1:  xxx xxxx xyyy
+    //2:  yyy yyzz zzzz
+    //3:  zza aaaa aaab
+    //4:  bbb bbbb cccc
+    //5:  ccc cddd dddd
+    //6:  dee eeee eeff
+    //7:  fff fffg gggg
+    //8:  ggg hhhh hhhh
+    //9:  xxx xxxx xyyy
+    //10: yyy yyzz zzzz
+    //11: zza aaaa aaab
+    //12: bbb bbbb cccc
+    func testVerifyElementForEntropyPlusChecksumGrouped() {
         // given
         let sut = makeSUT()
         let input = Array<UInt8>(repeating: 1, count: 16)
+        let expectedArray: [UInt16] = [
+            0b0000_0000_0000_1000,
+            0b0000_0000_0100_0000,
+            0b0000_0010_0000_0010,
+            0b0000_0000_0001_0000,
+            0b0000_0000_1000_0000,
+            0b0000_0100_0000_0100,
+            0b0000_0000_0010_0000,
+            0b0000_0001_0000_0001,
+            0b0000_0000_0000_1000,
+            0b0000_0000_0100_0000,
+            0b0000_0010_0000_0010,
+            0b0000_0000_0001_0000
+        ]
 
         // when
         let groups = sut.entropyPlusChecksumGrouped(in: input)
 
         // then
-        XCTAssertEqual(groups[2], 0b0000001000000010)
-    }
-
-    func testVerifyForthElementForEntropyPlusChecksumGrouped() {
-        // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 1, count: 16)
-
-        // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups[3], 0b0000000000010000)
-    }
-
-    func testVerifyFifthElementForEntropyPlusChecksumGrouped() {
-        // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 1, count: 16)
-
-        // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups[4], 0b0000000010000000)
-    }
-
-    func testVerifySixthElementForEntropyPlusChecksumGrouped() {
-        // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 1, count: 16)
-
-        // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups[5], 0b0000010000000100)
+        XCTAssertEqual(groups, expectedArray)
     }
 
     private func makeSUT() -> BIP39 {
