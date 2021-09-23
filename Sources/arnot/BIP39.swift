@@ -19,7 +19,7 @@ struct BIP39 {
         data[0] >> 4
     }
 
-    func entropyPlusChecksumGrouped(in input: [UInt8]) -> [UInt16] {
+    func entropyPlusChecksumGrouped(in input: [UInt8], checkSum: Int) -> [UInt16] {
         let mask: UInt16 = 0b0000011111111111
         let input16 = input.map { UInt16($0) }
         var output: [UInt16] = Array<UInt16>(repeating: 0, count: 12)
@@ -34,6 +34,7 @@ struct BIP39 {
             output[lastWordIndex] = output[lastWordIndex] | (value << leftOffset) & mask
         }
 
+        output[11] = output[11] | UInt16(checkSum)
         return Array(output)
     }
 }

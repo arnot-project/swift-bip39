@@ -68,43 +68,9 @@ final class BIP39Tests: XCTestCase {
         // then
         XCTAssertEqual(checksumCS, 0b1111)
     }
-
-    func testEntropyPlusChecksumGroupedWithArguments() {
-        // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 0, count: 16)
-
-        // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups.first, 0b0000000000000000)
-    }
-
-    func testEntropy129PlusChecksumGrouped() {
-        // given
-        let sut = makeSUT()
-
-        // when
-        let input = Array<UInt8>(repeating: 129, count: 16)
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups.first, 0b0000010000001100)
-    }
-
-    func testVerifySecondElementForEntropyPlusChecksumGroupedWithElement129() {
-        // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 129, count: 16)
-
-        // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
-
-        // then
-        XCTAssertEqual(groups[1], 0b0000000001100000)
-    }
     
+    // MARK: - EntropyPlusChecksum
+
     //1:  xxx xxxx xyyy
     //2:  yyy yyzz zzzz
     //3:  zza aaaa aaab
@@ -117,7 +83,7 @@ final class BIP39Tests: XCTestCase {
     //10: yyy yyzz zzzz
     //11: zza aaaa aaab
     //12: bbb bbbb cccc
-    func testVerifyElementForEntropyPlusChecksumGrouped() {
+    func testVerifyArrayOf1sWithChecksumZero() {
         // given
         let sut = makeSUT()
         let input = Array<UInt8>(repeating: 1, count: 16)
@@ -137,36 +103,48 @@ final class BIP39Tests: XCTestCase {
         ]
 
         // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
+        let groups = sut.entropyPlusChecksumGrouped(in: input, checkSum: 0)
 
         // then
         XCTAssertEqual(groups, expectedArray)
     }
 
-    func testVerifyArrayOfZerosWith129() {
+    func testVerifyArrayOf129sWithChecksumZero() {
         // given
         let sut = makeSUT()
-        var input = Array<UInt8>(repeating: 0, count: 16)
-        input[1] = 129
+        let input = Array<UInt8>(repeating: 129, count: 16)
+        let expectedArray: [UInt16] = [
+            0b0000_0100_0000_1100,
+            0b0000_0000_0110_0000,
+            0b0000_0011_0000_0011,
+            0b0000_0000_0001_1000,
+            0b0000_0000_1100_0000,
+            0b0000_0110_0000_0110,
+            0b0000_0000_0011_0000,
+            0b0000_0001_1000_0001,
+            0b0000_0100_0000_1100,
+            0b0000_0000_0110_0000,
+            0b0000_0011_0000_0011,
+            0b0000_0000_0001_0000
+        ]
 
         // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
+        let groups = sut.entropyPlusChecksumGrouped(in: input, checkSum: 0)
 
         // then
-        XCTAssertEqual(groups[1], 0b0000_0000_0100_0000)
+        XCTAssertEqual(groups, expectedArray)
     }
 
-    func testVerifyArrayOfZerosWithLastElement1() {
+    func testVerifyArrayOfZerosWithCheckSum1() {
         // given
         let sut = makeSUT()
-        var input = Array<UInt8>(repeating: 0, count: 16)
-        input[15] = 1
+        let input = Array<UInt8>(repeating: 0, count: 16)
 
         // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input)
+        let groups = sut.entropyPlusChecksumGrouped(in: input, checkSum: 1)
 
         // then
-        XCTAssertEqual(groups[11], 0b0000_0000_0001_0000)
+        XCTAssertEqual(groups[11], 0b0000_0000_0000_0001)
     }
 
     private func makeSUT() -> BIP39 {
