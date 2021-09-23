@@ -69,6 +69,18 @@ final class BIP39Tests: XCTestCase {
         XCTAssertEqual(checksumCS, 0b1111)
     }
 
+    func testEntropyPlusChecksumGroupedWithArguments() {
+        // given
+        let sut = makeSUT()
+        let input = Array<UInt8>(repeating: 0, count: 16)
+
+        // when
+        let groups = sut.entropyPlusChecksumGrouped(in: input)
+
+        // then
+        XCTAssertEqual(groups.first, 0b0000000000000000)
+    }
+
     func testEntropy129PlusChecksumGrouped() {
         // given
         let sut = makeSUT()
@@ -129,6 +141,32 @@ final class BIP39Tests: XCTestCase {
 
         // then
         XCTAssertEqual(groups, expectedArray)
+    }
+
+    func testVerifyArrayOfZerosWith129() {
+        // given
+        let sut = makeSUT()
+        var input = Array<UInt8>(repeating: 0, count: 16)
+        input[1] = 129
+
+        // when
+        let groups = sut.entropyPlusChecksumGrouped(in: input)
+
+        // then
+        XCTAssertEqual(groups[1], 0b0000_0000_0100_0000)
+    }
+
+    func testVerifyArrayOfZerosWithLastElement1() {
+        // given
+        let sut = makeSUT()
+        var input = Array<UInt8>(repeating: 0, count: 16)
+        input[15] = 1
+
+        // when
+        let groups = sut.entropyPlusChecksumGrouped(in: input)
+
+        // then
+        XCTAssertEqual(groups[11], 0b0000_0000_0001_0000)
     }
 
     private func makeSUT() -> BIP39 {

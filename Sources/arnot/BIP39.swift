@@ -20,25 +20,21 @@ struct BIP39 {
     }
 
     func entropyPlusChecksumGrouped(in input: [UInt8]) -> [UInt16] {
-        let left = UInt16(input.first ?? 0)
-        let right = UInt16(input.last ?? 0)
         let mask: UInt16 = 0b0000011111111111
-        let first: UInt16 = ((left << 3) | (right >> 5)) & mask
-        let second: UInt16 = ((left << 6) | (right >> 2)) & mask
-        let third: UInt16 = ((left << 9) | (right << 1) | (left >> 7)) & mask
-        let fourth: UInt16 = ((left << 4) | (right >> 4)) & mask
-        let fifth: UInt16 = ((left << 7) | (right >> 1)) & mask
-        let sixth: UInt16 = ((left << 10) | (right << 2) | (left >> 6)) & mask
+        let input16 = input.map { UInt16($0) }
+        var output: [UInt16] = Array<UInt16>(repeating: 0, count: 12)
 
-        return [
-            first,
-            second,
-            third,
-            fourth,
-            fifth,
-            sixth
-        ]
+        for (index, value) in input16.enumerated() {
+            let firstWordIndex = (index * 8) / 11
+            let rightOffset = (index * 8) % 11
+            output[firstWordIndex] = output[firstWordIndex] | ((value << 3) >> rightOffset)
+            
+            let lastWordIndex = (index * 8 + 8) / 11
+            let leftOffset = 11 - (index * 8 + 8) % 11
+            output[lastWordIndex] = output[lastWordIndex] | (value << leftOffset) & mask
+        }
 
+        return Array(output)
     }
 }
 
