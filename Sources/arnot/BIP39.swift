@@ -8,23 +8,15 @@ struct BIP39 {
     }
 
     func bip39() -> [UInt16] {
-        entropyPlusChecksumGrouped(
-            in: generateEntropy(),
-            checkSum: checksumCS(
-                of: hash(of: [0])
-            )
+        let entropy = cryptoProvider.generateRandomBytes()
+        let checkSum = checksumCS(of: cryptoProvider.sha256(of: [0]))
+        return entropyPlusChecksumGrouped(
+            in: entropy,
+            checkSum: checkSum
         )
     }
 
-    func generateEntropy() -> [UInt8] {
-        cryptoProvider.generateRandomBytes()
-    }
-
-    func hash(of data: [UInt8]) -> [UInt8] {
-        cryptoProvider.sha256(of: data)
-    }
-
-    func checksumCS(of data: [UInt8]) -> UInt8 {
+    private func checksumCS(of data: [UInt8]) -> UInt8 {
         data[0] >> 4
     }
 

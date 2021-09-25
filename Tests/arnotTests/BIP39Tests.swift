@@ -15,16 +15,6 @@ struct MockCryptoProvider: CryptoProviding {
 }
 
 final class BIP39Tests: XCTestCase {
-    func testEntropyHasCorrectNumberOfBytes() {
-        // given
-        let sut = makeSUT()
-
-        // when
-        let entropy = sut.generateEntropy()
-
-        // then
-        XCTAssertEqual(entropy.count, 16)
-    }
 
     func testCheckSumLengthIsFour() {
         // given
