@@ -9,7 +9,7 @@ struct BIP39 {
 
     func bip39() -> [UInt16] {
         let entropy = cryptoProvider.generateRandomBytes()
-        let checkSum = checksumCS(of: cryptoProvider.sha256(of: [0]))
+        let checkSum = checksumCS(of: cryptoProvider.sha256(of: entropy))
         return entropyPlusChecksumGrouped(
             in: entropy,
             checkSum: checkSum

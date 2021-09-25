@@ -10,6 +10,7 @@ struct MockCryptoProvider: CryptoProviding {
     }
 
     func sha256(of data: [UInt8]) -> [UInt8] {
+        assert(data == entropy)
         return sha256
     }
 }
