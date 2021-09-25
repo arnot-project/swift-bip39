@@ -18,17 +18,6 @@ struct MockCryptoProvider: CryptoProviding {
 
 final class BIP39Tests: XCTestCase {
 
-    func testCheckSumLengthIsFour() {
-        // given
-        let sut = makeSUT()
-
-        // when
-        let checksumLength = sut.checksumLength
-
-        // then
-        XCTAssertEqual(checksumLength, 4)
-    }
-
     //1:  xxx xxxx xyyy
     //2:  yyy yyzz zzzz
     //3:  zza aaaa aaab

@@ -20,7 +20,6 @@ protocol CryptoProviding {
 struct BIP39 {
 
     let cryptoProvider: CryptoProviding
-    let checksumLength = 4
 
     init(crypto: CryptoProviding) {
         self.cryptoProvider = crypto
