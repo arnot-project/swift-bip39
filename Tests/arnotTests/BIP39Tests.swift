@@ -90,6 +90,43 @@ final class BIP39Tests: XCTestCase {
         XCTAssertEqual(result, expectedArray)
     }
 
+    func testStrength256() {
+        // given
+        let sut = makeSUT(entropy: Array<UInt8>(repeating: 129, count: 256 / 8), sha256: [128])
+        let expectedArray: [UInt16] = [
+            0b0000_0100_0000_1100,
+            0b0000_0000_0110_0000,
+            0b0000_0011_0000_0011,
+            0b0000_0000_0001_1000,
+            0b0000_0000_1100_0000,
+            0b0000_0110_0000_0110,
+            0b0000_0000_0011_0000,
+            0b0000_0001_1000_0001,
+            0b0000_0100_0000_1100,
+            0b0000_0000_0110_0000,
+            0b0000_0011_0000_0011,
+            0b0000_0000_0001_1000,
+            0b0000_0000_1100_0000,
+            0b0000_0110_0000_0110,
+            0b0000_0000_0011_0000,
+            0b0000_0001_1000_0001,
+            0b0000_0100_0000_1100,
+            0b0000_0000_0110_0000,
+            0b0000_0011_0000_0011,
+            0b0000_0000_0001_1000,
+            0b0000_0000_1100_0000,
+            0b0000_0110_0000_0110,
+            0b0000_0000_0011_0000,
+            0b0000_0001_1000_0000
+        ]
+
+        // when
+        let result = sut.bip39()
+
+        // then
+        XCTAssertEqual(result, expectedArray)
+    }
+
     private func makeSUT(
         entropy: [UInt8] = Array<UInt8>(repeating: 5, count: 128 / 8),
         sha256: [UInt8] = [249]

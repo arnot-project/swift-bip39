@@ -9,21 +9,19 @@ struct BIP39 {
 
     func bip39() -> [UInt16] {
         let entropy = cryptoProvider.generateRandomBytes()
-        let checkSum = checksumCS(of: cryptoProvider.sha256(of: entropy))
+        let sha = cryptoProvider.sha256(of: entropy)
+        let checkSum = sha[0] >> (8 - ((entropy.count * 8) / 32))
         return entropyPlusChecksumGrouped(
             in: entropy,
             checkSum: checkSum
         )
     }
 
-    private func checksumCS(of data: [UInt8]) -> UInt8 {
-        data[0] >> 4
-    }
-
     private func entropyPlusChecksumGrouped(in input: [UInt8], checkSum: UInt8) -> [UInt16] {
         let mask: UInt16 = 0b0000011111111111
         let input16 = input.map { UInt16($0) }
-        var output: [UInt16] = Array<UInt16>(repeating: 0, count: 12)
+        let count = (input.count * 8 + (input.count * 8 / 32)) / 11
+        var output: [UInt16] = Array<UInt16>(repeating: 0, count: count)
 
         for (index, value) in input16.enumerated() {
             let firstWordIndex = (index * 8) / 11
@@ -35,7 +33,7 @@ struct BIP39 {
             output[lastWordIndex] = output[lastWordIndex] | (value << leftOffset) & mask
         }
 
-        output[11] = output[11] | UInt16(checkSum)
+        output[count - 1] = output[count - 1] | UInt16(checkSum)
         return Array(output)
     }
 }
