@@ -1,15 +1,16 @@
 import XCTest
 @testable import arnot
 
-class MockCryptoProvider: CryptoProviding {
+struct MockCryptoProvider: CryptoProviding {
+    let entropy: [UInt8]
+    let sha256: [UInt8]
+
     func generateRandomBytes() -> [UInt8] {
-        let strength = 128
-        let count = strength / 8
-        return Array<UInt8>(repeating: 5, count: count)
+        return entropy
     }
 
     func sha256(of data: [UInt8]) -> [UInt8] {
-        return [249]
+        return sha256
     }
 }
 
@@ -25,17 +26,6 @@ final class BIP39Tests: XCTestCase {
         XCTAssertEqual(entropy.count, 16)
     }
 
-    func testEntropyHasCorrectFirstByte() {
-        // given
-        let sut = makeSUT()
-
-        // when
-        let entropy = sut.generateEntropy()
-
-        // then
-        XCTAssertEqual(entropy.first, 0b00000101)
-    }
-
     func testCheckSumLengthIsFour() {
         // given
         let sut = makeSUT()
@@ -46,30 +36,6 @@ final class BIP39Tests: XCTestCase {
         // then
         XCTAssertEqual(checksumLength, 4)
     }
-
-    func testSha256() {
-        // given
-        let sut = makeSUT()
-
-        // when
-        let hash = sut.hash(of: sut.generateEntropy())
-
-        // then
-        XCTAssertEqual(hash.first, 0b11111001)
-    }
-
-    func testCaclucalteChecksumCS() {
-        // given
-        let sut = makeSUT()
-
-        // when
-        let checksumCS = sut.checksumCS(of: sut.hash(of: sut.generateEntropy()))
-
-        // then
-        XCTAssertEqual(checksumCS, 0b1111)
-    }
-    
-    // MARK: - EntropyPlusChecksum
 
     //1:  xxx xxxx xyyy
     //2:  yyy yyzz zzzz
@@ -85,8 +51,7 @@ final class BIP39Tests: XCTestCase {
     //12: bbb bbbb cccc
     func testVerifyArrayOf1sWithChecksumZero() {
         // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 1, count: 16)
+        let sut = makeSUT(entropy: Array<UInt8>(repeating: 1, count: 128 / 8), sha256: [1])
         let expectedArray: [UInt16] = [
             0b0000_0000_0000_1000,
             0b0000_0000_0100_0000,
@@ -103,7 +68,7 @@ final class BIP39Tests: XCTestCase {
         ]
 
         // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input, checkSum: 0)
+        let groups = sut.bip39()
 
         // then
         XCTAssertEqual(groups, expectedArray)
@@ -111,8 +76,7 @@ final class BIP39Tests: XCTestCase {
 
     func testVerifyArrayOf129sWithChecksumZero() {
         // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 129, count: 16)
+        let sut = makeSUT(entropy: Array<UInt8>(repeating: 129, count: 128 / 8), sha256: [1])
         let expectedArray: [UInt16] = [
             0b0000_0100_0000_1100,
             0b0000_0000_0110_0000,
@@ -129,27 +93,41 @@ final class BIP39Tests: XCTestCase {
         ]
 
         // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input, checkSum: 0)
+        let result = sut.bip39()
 
         // then
-        XCTAssertEqual(groups, expectedArray)
+        XCTAssertEqual(result, expectedArray)
     }
 
     func testVerifyArrayOfZerosWithCheckSum1() {
         // given
-        let sut = makeSUT()
-        let input = Array<UInt8>(repeating: 0, count: 16)
+        let sut = makeSUT(entropy: Array<UInt8>(repeating: 0, count: 128 / 8), sha256: [16])
 
         // when
-        let groups = sut.entropyPlusChecksumGrouped(in: input, checkSum: 1)
+        let groups = sut.bip39()
 
         // then
         XCTAssertEqual(groups[11], 0b0000_0000_0000_0001)
     }
 
-    private func makeSUT() -> BIP39 {
-        let crypto = MockCryptoProvider()
-        return BIP39(crypto: crypto)
+    func testVerifyArrayOfZerosWithCheckSum8() {
+        // given
+        let sut = makeSUT(entropy: Array<UInt8>(repeating: 0, count: 128 / 8), sha256: [128])
+
+        // when
+        let groups = sut.bip39()
+
+        // then
+        XCTAssertEqual(groups[11], 0b0000_0000_0000_1000)
+    }
+
+    private func makeSUT(
+        entropy: [UInt8] = Array<UInt8>(repeating: 5, count: 128 / 8),
+        sha256: [UInt8] = [249]
+    ) -> BIP39 {
+        BIP39(crypto: MockCryptoProvider(
+            entropy: entropy,
+            sha256: sha256))
     }
 }
 
