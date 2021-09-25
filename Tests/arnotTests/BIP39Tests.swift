@@ -5,7 +5,8 @@ struct MockCryptoProvider: CryptoProviding {
     let entropy: [UInt8]
     let sha256: [UInt8]
 
-    func generateRandomBytes() -> [UInt8] {
+    func generateRandomBytes(withSize size: Int) -> [UInt8] {
+        assert(size == entropy.count * 8)
         return entropy
     }
 
@@ -59,7 +60,7 @@ final class BIP39Tests: XCTestCase {
         ]
 
         // when
-        let groups = sut.bip39()
+        let groups = sut.bip39(withENT: .bits128)
 
         // then
         XCTAssertEqual(groups, expectedArray)
@@ -84,7 +85,7 @@ final class BIP39Tests: XCTestCase {
         ]
 
         // when
-        let result = sut.bip39()
+        let result = sut.bip39(withENT: .bits128)
 
         // then
         XCTAssertEqual(result, expectedArray)
@@ -121,7 +122,7 @@ final class BIP39Tests: XCTestCase {
         ]
 
         // when
-        let result = sut.bip39()
+        let result = sut.bip39(withENT: .bits256)
 
         // then
         XCTAssertEqual(result, expectedArray)

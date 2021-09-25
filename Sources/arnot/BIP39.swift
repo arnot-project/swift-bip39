@@ -1,3 +1,22 @@
+enum EntropyLength {
+    case bits128, bits160, bits192, bits224, bits256
+
+    var size: Int {
+        switch self {
+            case .bits128: return 128
+            case .bits160: return 160
+            case .bits192: return 192
+            case .bits224: return 224
+            case .bits256: return 256
+        }
+    }
+}
+
+protocol CryptoProviding {
+    func generateRandomBytes(withSize size: Int) -> [UInt8]
+    func sha256(of data: [UInt8]) -> [UInt8]
+}
+
 struct BIP39 {
 
     let cryptoProvider: CryptoProviding
@@ -7,8 +26,8 @@ struct BIP39 {
         self.cryptoProvider = crypto
     }
 
-    func bip39() -> [UInt16] {
-        let entropy = cryptoProvider.generateRandomBytes()
+    func bip39(withENT ent: EntropyLength) -> [UInt16] {
+        let entropy = cryptoProvider.generateRandomBytes(withSize: ent.size)
         let sha = cryptoProvider.sha256(of: entropy)
         let checkSum = sha[0] >> (8 - ((entropy.count * 8) / 32))
         return entropyPlusChecksumGrouped(
@@ -36,9 +55,4 @@ struct BIP39 {
         output[count - 1] = output[count - 1] | UInt16(checkSum)
         return Array(output)
     }
-}
-
-protocol CryptoProviding {
-    func generateRandomBytes() -> [UInt8]
-    func sha256(of data: [UInt8]) -> [UInt8]
 }
