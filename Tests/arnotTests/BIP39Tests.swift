@@ -16,20 +16,20 @@ struct MockCryptoProvider: CryptoProviding {
     }
 }
 
+//1:  xxx xxxx xyyy
+//2:  yyy yyzz zzzz
+//3:  zza aaaa aaab
+//4:  bbb bbbb cccc
+//5:  ccc cddd dddd
+//6:  dee eeee eeff
+//7:  fff fffg gggg
+//8:  ggg hhhh hhhh
+//9:  xxx xxxx xyyy
+//10: yyy yyzz zzzz
+//11: zza aaaa aaab
+//12: bbb bbbb cccc
 final class BIP39Tests: XCTestCase {
-
-    //1:  xxx xxxx xyyy
-    //2:  yyy yyzz zzzz
-    //3:  zza aaaa aaab
-    //4:  bbb bbbb cccc
-    //5:  ccc cddd dddd
-    //6:  dee eeee eeff
-    //7:  fff fffg gggg
-    //8:  ggg hhhh hhhh
-    //9:  xxx xxxx xyyy
-    //10: yyy yyzz zzzz
-    //11: zza aaaa aaab
-    //12: bbb bbbb cccc
+    
     func testVerifyArrayOf1sWithChecksumZero() {
         // given
         let sut = makeSUT(entropy: Array<UInt8>(repeating: 1, count: 128 / 8), sha256: [16])
